@@ -3,7 +3,7 @@ const htmlCanvas = document.getElementById(`c`);
 const ctx = htmlCanvas.getContext(`2d`);
 
 // Variables
-time_elapsed = 0;
+var time_elapsed = 0;
 
 const culture_width = 1400;
 const culture_height = 900;
@@ -14,7 +14,7 @@ const culture_diagonal_half = culture_diagonal / 2;
 const culture_area = culture_width * culture_height;
 
 const food_matrix = [];
-food_count = 0;
+var food_count = 0;
 const food_count_start = 0;
 const food_count_min = culture_area / 6400;
 const food_fatness = 3;
@@ -25,17 +25,17 @@ function food_value() {
 }
 
 const ent_matrix = [];
-ent_count = 0;
-ent_deaths = 0;
-ent_id = 0;
+var ent_count = 0;
+var ent_deaths = 0;
+var ent_id = 0;
 const ent_count_start = Math.floor(culture_area / 48000);
-lineages = 0;
-youngest_generation = 0;
-oldest_generation = 0;
-total_lifespan_of_dead = 0;
-average_age = 0;
-oldest_age = 0;
-average_colour = `#999`;
+var lineages = 0;
+var youngest_generation = 0;
+var oldest_generation = 0;
+var total_lifespan_of_dead = 0;
+var average_age = 0;
+var oldest_age = 0;
+var average_colour = `#999`;
 const stats_average_age = [];
 const stats_average_colour = [];
 const stats_youngest_average_colour = [];
@@ -43,9 +43,8 @@ const stats_descendants = [];
 const stats_generations = [];
 stats_descendants[0] = 0;
 stats_generations[0] = 0;
-highest_descendants = 0;
-highest_generations = 0;
-// let oldest_age_array = [];
+var highest_descendants = 0;
+var highest_generations = 0;
 
 const breed_waste = 0.01;
 const mutation_rarity = 9;
@@ -54,12 +53,12 @@ const supermutation_rarity = 9;
 const supermutation_intensity = 10;
 const s_mutation_intensity = 20;
 
-highlight_id = -1;
-saved_highlight_id = -1;
+var highlight_id = -1;
+var saved_highlight_id = -1;
 
 // - Graph
 
-graph = `descendants`;
+var graph = `descendants`;
 
 const graph_width = 400;
 const graph_height = 300;
@@ -69,13 +68,13 @@ const graph_x2 = graph_x1 + graph_width;
 const graph_y2 = graph_y1 + graph_height;
 
 // - UI
-highlight_pointer = false;
-cursor_x = 0;
-cursor_y = 0;
-leftclick = `select`;
+var highlight_pointer = false;
+var cursor_x = 0;
+var cursor_y = 0;
+var leftclick = `select`;
 
-ui_select_h = false;
-ui_select_c = false;
+var ui_select_h = false;
+var ui_select_c = false;
 const ui_select_x1 = 10;
 const ui_select_y1 = culture_y;
 const ui_select_width = 30;
@@ -83,8 +82,8 @@ const ui_select_height = 30;
 const ui_select_x2 = ui_select_x1 + ui_select_width;
 const ui_select_y2 = ui_select_y1 + ui_select_height;
 
-ui_food_h = false;
-ui_food_c = false;
+var ui_food_h = false;
+var ui_food_c = false;
 const ui_food_x1 = 10;
 const ui_food_y1 = culture_y + 40;
 const ui_food_width = 30;
@@ -92,8 +91,8 @@ const ui_food_height = 30;
 const ui_food_x2 = ui_food_x1 + ui_food_width;
 const ui_food_y2 = ui_food_y1 + ui_food_height;
 
-ui_ent_h = false;
-ui_ent_c = false;
+var ui_ent_h = false;
+var ui_ent_c = false;
 const ui_ent_x1 = 10;
 const ui_ent_y1 = culture_y + 80;
 const ui_ent_width = 30;
@@ -101,8 +100,8 @@ const ui_ent_height = 30;
 const ui_ent_x2 = ui_ent_x1 + ui_ent_width;
 const ui_ent_y2 = ui_ent_y1 + ui_ent_height;
 
-ui_mutate_h = false;
-ui_mutate_c = false;
+var ui_mutate_h = false;
+var ui_mutate_c = false;
 const ui_mutate_x1 = 10;
 const ui_mutate_y1 = culture_y + 120;
 const ui_mutate_width = 30;
@@ -110,8 +109,8 @@ const ui_mutate_height = 30;
 const ui_mutate_x2 = ui_mutate_x1 + ui_mutate_width;
 const ui_mutate_y2 = ui_mutate_y1 + ui_mutate_height;
 
-ui_g_descendants_h = false;
-ui_g_descendants_c = false;
+var ui_g_descendants_h = false;
+var ui_g_descendants_c = false;
 const ui_g_descendants_x1 = graph_x2 + 10;
 const ui_g_descendants_y1 = graph_y1;
 const ui_g_descendants_width = 30;
@@ -119,8 +118,8 @@ const ui_g_descendants_height = 30;
 const ui_g_descendants_x2 = ui_g_descendants_x1 + ui_g_descendants_width;
 const ui_g_descendants_y2 = ui_g_descendants_y1 + ui_g_descendants_height;
 
-ui_g_generations_h = false;
-ui_g_generations_c = false;
+var ui_g_generations_h = false;
+var ui_g_generations_c = false;
 const ui_g_generations_x1 = graph_x2 + 10;
 const ui_g_generations_y1 = graph_y1 + 40;
 const ui_g_generations_width = 30;
@@ -152,15 +151,15 @@ function findDistance(xa1, ya1, xa2, ya2) {
 }
 
 function findAngle(xb1, yb1, xb2, yb2) {
-    nb1 = yb2 - yb1;
-    nb2 = xb2 - xb1;
-    theta = Math.atan2(nb1, nb2);
+    let nb1 = yb2 - yb1;
+    let nb2 = xb2 - xb1;
+    let theta = Math.atan2(nb1, nb2);
     theta *= 180 / Math.PI;
     return theta;
 }
 
 function findNewPoint(xc1, yc1, angle, distance) {
-    var result = {};
+    let result = {};
     result.xc2 = Math.round(Math.cos(angle * Math.PI / 180) * distance + xc1);
     result.yc2 = Math.round(Math.sin(angle * Math.PI / 180) * distance + yc1);
     return result;
@@ -386,7 +385,6 @@ function drawText() {
     ctx.lineWidth = 3;
     ctx.fillStyle = `#555`;
     ctx.font = `15px Courier New`;
-    // ctx.fillText(`version cones 0`, culture_x + culture_width - 150, culture_y + culture_height + 12);
     ctx.fillStyle = `#fff`;
     ctx.font = `20px Courier New`;
     let nbt2 = -37;
@@ -461,11 +459,7 @@ function drawGraph() {
             ctx.stroke();
         }
         ctx.fillStyle = `#fff`;
-        // ctx.font = `20px Courier New`;
-        // ctx.fillText(`Descendants`, graph_x1, graph_y1 - 10);
         ctx.font = `15px Courier New`;
-        // ctx.fillText(`0`, graph_x1, graph_y2 + 12);
-        // ctx.fillText(`Time elapsed`, graph_x2 - 108, graph_y2 + 12);
         if(cursor_x <= graph_x2 && cursor_x >= graph_x1 && cursor_y <= graph_y2 && cursor_y >= graph_y1) {
             ctx.fillText(`${stats_descendants[Math.round(((cursor_x - graph_x1) / graph_width) * time_elapsed)]}`, cursor_x + 4, cursor_y - 24);
             ctx.fillText(`${Math.ceil(((cursor_x - graph_x1) / graph_width) * time_elapsed / 10)}`, cursor_x + 4, cursor_y - 8);
@@ -485,11 +479,7 @@ function drawGraph() {
             ctx.stroke();
         }
         ctx.fillStyle = `#fff`;
-        // ctx.font = `20px Courier New`;
-        // ctx.fillText(`Generations`, graph_x1, graph_y1 - 10);
         ctx.font = `15px Courier New`;
-        // ctx.fillText(`0`, graph_x1, graph_y2 + 12);
-        // ctx.fillText(`Time elapsed`, graph_x2 - 108, graph_y2 + 12);
         if(cursor_x <= graph_x2 && cursor_x >= graph_x1 && cursor_y <= graph_y2 && cursor_y >= graph_y1) {
             ctx.fillText(`${stats_generations[Math.round(((cursor_x - graph_x1) / graph_width) * time_elapsed)]}`, cursor_x + 4, cursor_y - 24);
             ctx.fillText(`${Math.ceil(((cursor_x - graph_x1) / graph_width) * time_elapsed / 10)}`, cursor_x + 4, cursor_y - 8);
@@ -627,26 +617,6 @@ function entValueSpeed(nam1) {
     + (oam1.speed_crowdedness * oam1.crowdedness);
     return nam2;
 }
-// function entValueTick(nbv1) {
-//     let obv1 = ent_matrix[nbv1];
-//     let nbv2 = obv1.tick
-//     + (obv1.tick_fooddistance * obv1.fooddistance)
-//     + (obv1.tick_preydistance * obv1.preydistance)
-//     + (obv1.tick_energy * obv1.energy)
-//     + (obv1.tick_abundance * obv1.abundance)
-//     + (obv1.tick_crowdedness * obv1.crowdedness);
-//     return nbv2;
-// }
-// function entValueLocus(nbx1) {
-//     let obx1 = ent_matrix[nbx1];
-//     let nbx2 = (obx1.locus_fooddistance * obx1.fooddistance)
-//     + (obx1.locus_preydistance * obx1.preydistance)
-//     + (obx1.locus_energy * obx1.energy)
-//     + (obx1.locus_integrity * obx1.integrity)
-//     + (obx1.locus_abundance * obx1.abundance)
-//     + (obx1.locus_crowdedness * obx1.crowdedness);
-//     return nbx2;
-// }
 
 function entSpawn(of1) {
     of1.id = ent_id++;
@@ -717,9 +687,6 @@ function entGenesis(xaa1, yaa1) {
         hunt_integrity: 0,
         hunt_abundance: 0,
         hunt_crowdedness: 0,
-        // hunt_redsense: 0,
-        // hunt_greensense: 0,
-        // hunt_bluesense: 0,
         
         foodsense: culture_diagonal / 10,
         foodsense_energy: 0,
@@ -761,9 +728,6 @@ function entGenesis(xaa1, yaa1) {
         preydistance: 0, //distance from prey
         crowdedness: 0, // number of other entities within fetch range
         abundance: 0, // number of food within fetch range
-        // redsense: 0,
-        // greensense: 0,
-        // bluesense: 0,
         // - intents
         facing: 0, // facing angle
         pace: 0, // distance moved per tick
@@ -788,14 +752,7 @@ function entNearestPrey(nap1) {
             let oap2 = ent_matrix[nap3];
             let nap4 = findDistance(oap1.x, oap1.y, oap2.x, oap2.y);
             let nap5 = oap2.energy;
-            // sap1 = oap2.lineage;
-            // for(nap8 = sap1.length -1; sap1.charAt(nap8) === `,` && nap8 !== -1; nap8--) {};
-            // if(nap8 !== -1) {sap1 = sap1.substring(0, nap8 - 2)};
-            // sap2 = oap1.lineage;
-            // for(nap9 = sap2.length -1; sap2.charAt(nap9) === `,` && nap9 !== -1; nap9--) {};
-            // if(nap9 !== -1) {sap2 = sap2.substring(0, nap9 - 2)};
             if(nap4 < nap6
-            // && oap1.lineage !== sap1 && oap2.lineage !== sap2 && sap1 !== sap2
             && nap4 <= entValueHunt(nap1)
             && nap5 > 0
             && nap5 >= entValuePreyMinEnergy(nap1)
@@ -846,12 +803,6 @@ function entCollideEnt(ns1) {
             let ns4 = ((os3.radius + os4.radius) - ns3) / 2;
             let ns5 = findAngle(xs1, ys1, xs2, ys2);
             if(ns3 < os3.radius + os4.radius) {
-                // ent_matrix[ns1].pace = ns4;
-                // ent_matrix[ns1].facing = findAngle(xs1, ys1, xs2, ys2);
-                // entMove(ns1, 1);
-                // ent_matrix[ns2].pace = ns4;
-                // ent_matrix[ns2].facing = findAngle(xs2, ys2, xs1, ys1);
-                // entMove(ns2, 1);
                 let os1 = findNewPoint(xs1, ys1, ns5, -1 * ns4);
                 let os2 = findNewPoint(xs2, ys2, ns5, ns4);
                 entRelocate(ns1, os1.xc2, os1.yc2);
@@ -991,21 +942,6 @@ function entEntCount(naf1) {
         }
     }
 }
-
-// function entEntColourCount(nbz1) {
-//     ent_matrix[nbz1].redsense = 0;
-//     ent_matrix[nbz1].greensense = 0;
-//     ent_matrix[nbz1].bluesense = 0;
-//     for(nbz2 = 1; nbz2 <= ent_count; nbz2++) {
-//         if(nbz1 !== nbz2) {
-//             if(findDistance(ent_matrix[nbz1].x, ent_matrix[nbz1].y, ent_matrix[nbz2].x, ent_matrix[nbz2].y <= entValueEntSense(nbz1))) {
-//                 ent_matrix[nbz1].redsense += parseInt(ent_matrix[nbz2].colour.charAt(1), 16);
-//                 ent_matrix[nbz1].greensense += parseInt(ent_matrix[nbz2].colour.charAt(2), 16);
-//                 ent_matrix[nbz1].bluesense += parseInt(ent_matrix[nbz2].colour.charAt(3), 16);
-//             }
-//         }
-//     }
-// }
 
 function entFoodSeek(nl1) {
     if(food_count > 0) {
@@ -1387,7 +1323,6 @@ htmlCanvas.addEventListener(`mousemove`, e => {
     y = e.clientY;
     cursor_x = x;
     cursor_y = y;
-    // entHighlight();
     let pointer = false;
     let crosshair = false;
     if(entHighlight()) {
@@ -1558,10 +1493,9 @@ for(let nr1 = 0; nr1 < food_count_min; nr1++) {
     foodSpawn(randomNumber(culture_x + 10, culture_x + culture_width - 10), randomNumber(culture_y + 10, culture_y + culture_height - 10), food_value());
 }
 resizeCanvas();
-
-nt1 = 0;
-nt3 = 0;
 ;(function () {
+    let nt1 = 0;
+    let nt3 = 0;
     function timeLapse() {
         window.requestAnimationFrame(timeLapse);
         nt1++;
