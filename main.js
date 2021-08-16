@@ -140,13 +140,13 @@ const randomInteger = (min, max) => {
 }
 
 const randomColour = () => {
-    colour = `#`.concat(randomInteger(0, 15).toString(16), randomInteger(0, 15).toString(16), randomInteger(0, 15).toString(16));
+    let colour = `#`.concat(randomInteger(0, 15).toString(16), randomInteger(0, 15).toString(16), randomInteger(0, 15).toString(16));
     return colour;
 }
 
 function findDistance(xa1, ya1, xa2, ya2) {
-    na1 = xa1 - xa2;
-    na2 = ya1 - ya2;
+    let na1 = xa1 - xa2;
+    let na2 = ya1 - ya2;
     return Math.sqrt(na1*na1 + na2*na2);
 }
 
