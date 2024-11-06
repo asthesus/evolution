@@ -1,20 +1,71 @@
 // From document
 const htmlCanvas = document.getElementById(`c`);
 const ctx = htmlCanvas.getContext(`2d`);
-
 // Variables
-var time_elapsed = 0;
-
-const culture_width = 1400;
-const culture_height = 900;
-const culture_x = 50;
-const culture_y = 10;
-const culture_diagonal = findDistance(0, 0, culture_width, culture_height);
-const culture_diagonal_half = culture_diagonal / 2;
-const culture_area = culture_width * culture_height;
-
+let base_unit = window.innerWidth / 168;
+// - Graph
+let graph = `descendants`;
+let graph_width;
+let graph_height;
+let graph_x1 = 0;
+let graph_y1 = 0;
+let graph_x2;
+let graph_y2;
+// - UI
+let highlight_pointer = false;
+let cursor_x = 0;
+let cursor_y = 0;
+let leftclick = `select`;
+let ui_button_width = base_unit * 3;
+let ui_button_height = base_unit * 3;
+let ui_select_x1;
+let ui_select_y1;
+let ui_select_x2;
+let ui_select_y2;
+let ui_food_x1;
+let ui_food_y1;
+let ui_food_x2;
+let ui_food_y2;
+let ui_ent_x1;
+let ui_ent_y1;
+let ui_ent_x2;
+let ui_ent_y2;
+let ui_mutate_x1;
+let ui_mutate_y1;
+let ui_mutate_x2;
+let ui_mutate_y2;
+let ui_g_descendants_x1;
+let ui_g_descendants_y1;
+let ui_g_descendants_x2;
+let ui_g_descendants_y2;
+let ui_g_generations_x1;
+let ui_g_generations_y1;
+let ui_g_generations_x2;
+let ui_g_generations_y2;
+let ui_g_generations_h = false;
+let ui_g_generations_c = false;
+let ui_g_descendants_h = false;
+let ui_g_descendants_c = false;
+let ui_mutate_h = false;
+let ui_mutate_c = false;
+let ui_ent_h = false;
+let ui_ent_c = false;
+let ui_food_h = false;
+let ui_food_c = false;
+let ui_select_h = false;
+let ui_select_c = false;
+// culture
+let culture_width = window.innerWidth - ui_button_width * 5 - base_unit * 40;
+let culture_height = window.innerHeight - base_unit * 6;
+let culture_x = ui_button_width * 2;
+let culture_y = ui_button_height / 2;
+let culture_diagonal = findDistance(0, 0, culture_width, culture_height);
+let culture_diagonal_half = culture_diagonal / 2;
+let culture_area = culture_width * culture_height;
+//
+let time_elapsed = 0;
 const food_matrix = [];
-var food_count = 0;
+let food_count = 0;
 const food_count_start = 0;
 const food_count_min = culture_area / 6400;
 const food_fatness = 3;
@@ -23,19 +74,18 @@ const food_value_max = 36;
 function food_value() {
     return randomNumber(food_value_min, food_value_max);
 }
-
 const ent_matrix = [];
-var ent_count = 0;
-var ent_deaths = 0;
-var ent_id = 0;
+let ent_count = 0;
+let ent_deaths = 0;
+let ent_id = 0;
 const ent_count_start = Math.floor(culture_area / 48000);
-var lineages = 0;
-var youngest_generation = 0;
-var oldest_generation = 0;
-var total_lifespan_of_dead = 0;
-var average_age = 0;
-var oldest_age = 0;
-var average_colour = `#999`;
+let lineages = 0;
+let youngest_generation = 0;
+let oldest_generation = 0;
+let total_lifespan_of_dead = 0;
+let average_age = 0;
+let oldest_age = 0;
+let average_colour = `#999`;
 const stats_average_age = [];
 const stats_average_colour = [];
 const stats_youngest_average_colour = [];
@@ -43,113 +93,33 @@ const stats_descendants = [];
 const stats_generations = [];
 stats_descendants[0] = 0;
 stats_generations[0] = 0;
-var highest_descendants = 0;
-var highest_generations = 0;
-
+let highest_descendants = 0;
+let highest_generations = 0;
 const breed_waste = 0.01;
 const mutation_rarity = 9;
 const mutation_intensity = 1;
 const supermutation_rarity = 9;
 const supermutation_intensity = 10;
 const s_mutation_intensity = 20;
-
-var highlight_id = -1;
-var saved_highlight_id = -1;
-
-// - Graph
-
-var graph = `descendants`;
-
-const graph_width = 400;
-const graph_height = 300;
-const graph_x1 = culture_x + culture_width + 10;
-const graph_y1 = culture_y + culture_height - graph_height;
-const graph_x2 = graph_x1 + graph_width;
-const graph_y2 = graph_y1 + graph_height;
-
-// - UI
-var highlight_pointer = false;
-var cursor_x = 0;
-var cursor_y = 0;
-var leftclick = `select`;
-
-var ui_select_h = false;
-var ui_select_c = false;
-const ui_select_x1 = 10;
-const ui_select_y1 = culture_y;
-const ui_select_width = 30;
-const ui_select_height = 30;
-const ui_select_x2 = ui_select_x1 + ui_select_width;
-const ui_select_y2 = ui_select_y1 + ui_select_height;
-
-var ui_food_h = false;
-var ui_food_c = false;
-const ui_food_x1 = 10;
-const ui_food_y1 = culture_y + 40;
-const ui_food_width = 30;
-const ui_food_height = 30;
-const ui_food_x2 = ui_food_x1 + ui_food_width;
-const ui_food_y2 = ui_food_y1 + ui_food_height;
-
-var ui_ent_h = false;
-var ui_ent_c = false;
-const ui_ent_x1 = 10;
-const ui_ent_y1 = culture_y + 80;
-const ui_ent_width = 30;
-const ui_ent_height = 30;
-const ui_ent_x2 = ui_ent_x1 + ui_ent_width;
-const ui_ent_y2 = ui_ent_y1 + ui_ent_height;
-
-var ui_mutate_h = false;
-var ui_mutate_c = false;
-const ui_mutate_x1 = 10;
-const ui_mutate_y1 = culture_y + 120;
-const ui_mutate_width = 30;
-const ui_mutate_height = 30;
-const ui_mutate_x2 = ui_mutate_x1 + ui_mutate_width;
-const ui_mutate_y2 = ui_mutate_y1 + ui_mutate_height;
-
-var ui_g_descendants_h = false;
-var ui_g_descendants_c = false;
-const ui_g_descendants_x1 = graph_x2 + 10;
-const ui_g_descendants_y1 = graph_y1;
-const ui_g_descendants_width = 30;
-const ui_g_descendants_height = 30;
-const ui_g_descendants_x2 = ui_g_descendants_x1 + ui_g_descendants_width;
-const ui_g_descendants_y2 = ui_g_descendants_y1 + ui_g_descendants_height;
-
-var ui_g_generations_h = false;
-var ui_g_generations_c = false;
-const ui_g_generations_x1 = graph_x2 + 10;
-const ui_g_generations_y1 = graph_y1 + 40;
-const ui_g_generations_width = 30;
-const ui_g_generations_height = 30;
-const ui_g_generations_x2 = ui_g_generations_x1 + ui_g_generations_width;
-const ui_g_generations_y2 = ui_g_generations_y1 + ui_g_generations_height;
-
+let highlight_id = -1;
+let saved_highlight_id = -1;
 // Functions
-
 // - Math
-
 const randomNumber = (min, max) => {
     return Math.random() * (max - min + 1) + min;
 }
-
 const randomInteger = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
 const randomColour = () => {
     let colour = `#`.concat(randomInteger(0, 15).toString(16), randomInteger(0, 15).toString(16), randomInteger(0, 15).toString(16));
     return colour;
 }
-
 function findDistance(xa1, ya1, xa2, ya2) {
     let na1 = xa1 - xa2;
     let na2 = ya1 - ya2;
     return Math.sqrt(na1*na1 + na2*na2);
 }
-
 function findAngle(xb1, yb1, xb2, yb2) {
     let nb1 = yb2 - yb1;
     let nb2 = xb2 - xb1;
@@ -157,22 +127,64 @@ function findAngle(xb1, yb1, xb2, yb2) {
     theta *= 180 / Math.PI;
     return theta;
 }
-
 function findNewPoint(xc1, yc1, angle, distance) {
     let result = {};
     result.xc2 = Math.round(Math.cos(angle * Math.PI / 180) * distance + xc1);
     result.yc2 = Math.round(Math.sin(angle * Math.PI / 180) * distance + yc1);
     return result;
 }
-
 // - Canvas
-
+function resizeCanvas() {
+    time_elapsed = 0;
+    htmlCanvas.width = window.innerWidth;
+    htmlCanvas.height = window.innerHeight;
+    base_unit = window.innerWidth / 168;
+    ui_button_width = 30;
+    ui_button_height = ui_button_width;
+    culture_x = ui_button_width + base_unit * 2;
+    culture_y = base_unit;
+    graph_width = window.innerWidth - culture_width - base_unit * 5 - ui_button_width * 2;
+    graph_height = Math.min(window.innerHeight - base_unit * 2 - base_unit * 20, culture_height - base_unit * 20, graph_width);
+    if(graph_width < 0) graph_width = 0;
+    if(graph_height < 0) graph_height = 0;
+    graph_x1 = culture_x + culture_width + base_unit;
+    graph_y1 = window.innerHeight - graph_height - base_unit;
+    graph_x2 = graph_x1 + graph_width;
+    graph_y2 = graph_y1 + graph_height;
+    
+    ui_select_x1 = base_unit;
+    ui_select_y1 = culture_y;
+    ui_select_x2 = ui_select_x1 + ui_button_width;
+    ui_select_y2 = ui_select_y1 + ui_button_height;
+    ui_food_x1 = base_unit;
+    ui_food_y1 = base_unit * 2 + ui_button_height;
+    ui_food_x2 = ui_food_x1 + ui_button_width;
+    ui_food_y2 = ui_food_y1 + ui_button_height;
+    ui_ent_x1 = base_unit;
+    ui_ent_y1 = base_unit * 3 + ui_button_height * 2;
+    ui_ent_x2 = ui_ent_x1 + ui_button_width;
+    ui_ent_y2 = ui_ent_y1 + ui_button_height;
+    ui_mutate_x1 = base_unit;
+    ui_mutate_y1 = base_unit * 4 + ui_button_height * 3;
+    ui_mutate_x2 = ui_mutate_x1 + ui_button_width;
+    ui_mutate_y2 = ui_mutate_y1 + ui_button_height;
+    ui_g_descendants_x1 = graph_x2 + base_unit;
+    ui_g_descendants_y1 = graph_y1;
+    ui_g_descendants_x2 = ui_g_descendants_x1 + ui_button_width;
+    ui_g_descendants_y2 = ui_g_descendants_y1 + ui_button_height;
+    ui_g_generations_x1 = graph_x2 + base_unit;
+    ui_g_generations_y1 = graph_y1 + ui_button_height + base_unit;
+    ui_g_generations_x2 = ui_g_generations_x1 + ui_button_width;
+    ui_g_generations_y2 = ui_g_generations_y1 + ui_button_height;
+    
+    drawAll();
+}
 function drawUI() {
     // select
     ctx.beginPath();
     if(leftclick === `select`) {ctx.lineWidth = `2`} else ctx.lineWidth = `1`;
     ctx.strokeStyle = `#666`;
-    ctx.strokeRect(ui_select_x1, ui_select_y1, ui_select_width, ui_select_height);
+    ctx.strokeRect(ui_select_x1, ui_select_y1, ui_button_width, ui_button_height);
     ctx.fillStyle = `#777`;
     ctx.font = `14px Courier New`;
     ctx.fillText(`sel`, ui_select_x1 + 2, ui_select_y1 + 13);
@@ -180,14 +192,14 @@ function drawUI() {
     if(ui_select_h) {
         ctx.fillStyle = `#777`;
         ctx.font = `18px Courier New`;
-        ctx.fillText(`Left click to select highlighted entity.`, culture_x, culture_y + culture_height + 18);
-        ctx.fillText(`Right click to clear highlight or selection.`, culture_x, culture_y + culture_height + 36);
+        ctx.fillText(`Left click to select highlighted entity.`, culture_x, window.innerHeight - base_unit * 3);
+        ctx.fillText(`Right click to clear highlight or selection.`, culture_x, window.innerHeight - base_unit);
     }
     // food
     ctx.beginPath();
     if(leftclick === `food`) {ctx.lineWidth = `2`} else ctx.lineWidth = `1`;
     ctx.strokeStyle = `#666`;
-    ctx.strokeRect(ui_food_x1, ui_food_y1, ui_food_width, ui_food_height);
+    ctx.strokeRect(ui_food_x1, ui_food_y1, ui_button_width, ui_button_height);
     ctx.fillStyle = `#777`;
     ctx.font = `16px Courier New`;
     ctx.fillText(`fo`, ui_food_x1 + 4, ui_food_y1 + 13);
@@ -195,28 +207,28 @@ function drawUI() {
     if(ui_food_h) {
         ctx.fillStyle = `#777`;
         ctx.font = `18px Courier New`;
-        ctx.fillText(`Left click to create food.`, culture_x, culture_y + culture_height + 18);
-        ctx.fillText(`Right click to feed entity.`, culture_x, culture_y + culture_height + 36);
+        ctx.fillText(`Left click to create food.`, culture_x, window.innerHeight - base_unit * 3);
+        ctx.fillText(`Right click to feed entity.`, culture_x, window.innerHeight - base_unit);
     }
     // ent
     ctx.beginPath();
     if(leftclick === `ent`) {ctx.lineWidth = `2`} else ctx.lineWidth = `1`;
     ctx.strokeStyle = `#666`;
-    ctx.strokeRect(ui_ent_x1, ui_ent_y1, ui_ent_width, ui_ent_height);
+    ctx.strokeRect(ui_ent_x1, ui_ent_y1, ui_button_width, ui_button_height);
     ctx.fillStyle = `#777`;
     ctx.font = `14px Courier New`;
     ctx.fillText(`ent`, ui_ent_x1 + 3, ui_ent_y1 + 18);
     if(ui_ent_h) {
         ctx.fillStyle = `#777`;
         ctx.font = `18px Courier New`;
-        ctx.fillText(`Left click to generate a random entity.`, culture_x, culture_y + culture_height + 18);
-        ctx.fillText(`Right click to delete entity.`, culture_x, culture_y + culture_height + 36);
+        ctx.fillText(`Left click to generate a random entity.`, culture_x, window.innerHeight - base_unit * 3);
+        ctx.fillText(`Right click to delete entity.`, culture_x, window.innerHeight - base_unit);
     }
     // mutate
     ctx.beginPath();
     if(leftclick === `mutate`) {ctx.lineWidth = `2`} else ctx.lineWidth = `1`;
     ctx.strokeStyle = `#666`;
-    ctx.strokeRect(ui_mutate_x1, ui_mutate_y1, ui_mutate_width, ui_mutate_height);
+    ctx.strokeRect(ui_mutate_x1, ui_mutate_y1, ui_button_width, ui_button_height);
     ctx.fillStyle = `#777`;
     ctx.font = `14px Courier New`;
     ctx.fillText(`mut`, ui_mutate_x1 + 3, ui_mutate_y1 + 13);
@@ -224,44 +236,42 @@ function drawUI() {
     if(ui_mutate_h) {
         ctx.fillStyle = `#777`;
         ctx.font = `18px Courier New`;
-        ctx.fillText(`Left click to mutate entity.`, culture_x, culture_y + culture_height + 18);
-        ctx.fillText(`Right click to mutate entity ten times.`, culture_x, culture_y + culture_height + 36);
+        ctx.fillText(`Left click to mutate entity.`, culture_x, window.innerHeight - base_unit * 3);
+        ctx.fillText(`Right click to mutate entity ten times.`, culture_x, window.innerHeight - base_unit);
     }
     // graph descendants
     ctx.beginPath();
     if(graph === `descendants`) {ctx.lineWidth = `2`} else ctx.lineWidth = `1`;
     ctx.strokeStyle = `#666`;
-    ctx.strokeRect(ui_g_descendants_x1, ui_g_descendants_y1, ui_g_descendants_width, ui_g_descendants_height);
+    ctx.strokeRect(ui_g_descendants_x1, ui_g_descendants_y1, ui_button_width, ui_button_height);
     ctx.fillStyle = `#777`;
     ctx.font = `14px Courier New`;
     ctx.fillText(`des`, ui_g_descendants_x1 + 2, ui_g_descendants_y1 + 19);
     if(ui_g_descendants_h) {
         ctx.fillStyle = `#777`;
         ctx.font = `18px Courier New`;
-        ctx.fillText(`Graph the total number of living descendants relative to the highest that value has been.`, culture_x, culture_y + culture_height + 18);
-        ctx.fillText(`Line is the average colour of descendants at that moment.`, culture_x, culture_y + culture_height + 36);
+        ctx.fillText(`Graph the total number of living descendants relative to the highest that value has been.`, culture_x, window.innerHeight - base_unit * 3);
+        ctx.fillText(`Line is the average colour of descendants at that moment.`, culture_x, window.innerHeight - base_unit);
     }
     // graph generations
     ctx.beginPath();
     if(graph === `generations`) {ctx.lineWidth = `2`} else ctx.lineWidth = `1`;
     ctx.strokeStyle = `#666`;
-    ctx.strokeRect(ui_g_generations_x1, ui_g_generations_y1, ui_g_generations_width, ui_g_generations_height);
+    ctx.strokeRect(ui_g_generations_x1, ui_g_generations_y1, ui_button_width, ui_button_height);
     ctx.fillStyle = `#777`;
     ctx.font = `14px Courier New`;
     ctx.fillText(`gen`, ui_g_generations_x1 + 2, ui_g_generations_y1 + 18);
     if(ui_g_generations_h) {
         ctx.fillStyle = `#777`;
         ctx.font = `18px Courier New`;
-        ctx.fillText(`Graph the highest generation achieved by any living lineage relative to the highest that value has been.`, culture_x, culture_y + culture_height + 18);
-        ctx.fillText(`Line is the average colour of only entities of the highest generation at that moment.`, culture_x, culture_y + culture_height + 36);
+        ctx.fillText(`Graph the highest generation achieved by any living lineage relative to the highest that value has been.`, culture_x, window.innerHeight - base_unit * 3);
+        ctx.fillText(`Line is the average colour of only entities of the highest generation at that moment.`, culture_x, window.innerHeight - base_unit);
     }
 }
-
 function drawVoid() {
     ctx.fillStyle = `#000`;
     ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 }
-
 function drawCulture() {
     ctx.beginPath();
     ctx.strokeStyle = `#666`;
@@ -269,7 +279,6 @@ function drawCulture() {
     ctx.strokeRect(culture_x, culture_y, culture_width, culture_height);
     ctx.stroke();
 }
-
 function drawEntities() {
     if(ent_count > 0) {
         let nd7 = 0;
@@ -367,7 +376,6 @@ function drawEntities() {
         ctx.fillText(`*`, ent_matrix[nd8].x - 12, ent_matrix[nd8].y + 17);
     }
 }
-
 function drawFood() {
     if(food_count > 0)
     for(nd1 = 1; nd1 <= food_count; nd1++) {
@@ -378,7 +386,6 @@ function drawFood() {
         ctx.stroke();
     }
 }
-
 function drawText() {
     youngest_generation = 0;
     ctx.beginPath();
@@ -438,7 +445,6 @@ function drawText() {
         }
     }
 }
-
 function drawGraph() {
     ctx.beginPath();
     ctx.lineWidth = 2;
@@ -486,7 +492,6 @@ function drawGraph() {
         }
     }
 }
-
 function drawAll() {
     drawVoid();
     drawEntities();
@@ -496,15 +501,7 @@ function drawAll() {
     drawGraph();
     drawText();
 }
-
-function resizeCanvas() {
-    htmlCanvas.width = window.innerWidth;
-    htmlCanvas.height = window.innerHeight;
-    drawAll();
-}
-
 // - Entities
-
 function entValueAttackpower(nbr1) {
     let obr1 = ent_matrix[nbr1];
     let nbr2 = obf1.attackpower
@@ -617,14 +614,12 @@ function entValueSpeed(nam1) {
     + (oam1.speed_crowdedness * oam1.crowdedness);
     return nam2;
 }
-
 function entSpawn(of1) {
     of1.id = ent_id++;
     // ent_id++;
     ent_count++;
     ent_matrix[ent_count] = of1;
 }
-
 function entGenesis(xaa1, yaa1) {
     lineages++;
     let oaa1 = {
@@ -742,7 +737,6 @@ function entGenesis(xaa1, yaa1) {
     oaa2.divergence = 0;
     entSpawn(oaa2);
 }
-
 function entNearestPrey(nap1) {
     let oap1 = ent_matrix[nap1];
     let nap6 = Infinity;
@@ -778,7 +772,6 @@ function entNearestPrey(nap1) {
     }
     return result;
 }
-
 function entCollideWall(ng1) {
     let og1 = ent_matrix[ng1];
     let xg1 = og1.x;
@@ -789,7 +782,6 @@ function entCollideWall(ng1) {
     if(yg1 < culture_y + ng2) {entRelocate(ng1, xg1, culture_y + ng2)};
     if(yg1 > culture_y + culture_height - ng2) {entRelocate(ng1, xg1, culture_y + culture_height - ng2)};
 }
-
 function entCollideEnt(ns1) {
     let os3 = ent_matrix[ns1];
     let xs1 = os3.x;
@@ -811,7 +803,6 @@ function entCollideEnt(ns1) {
         }
     }
 }
-
 function entFight(nbd1, nbd2) {
     let obd1 = ent_matrix[nbd1];
     let obd2 = ent_matrix[nbd2];
@@ -832,13 +823,11 @@ function entFight(nbd1, nbd2) {
         if(ent_matrix[nbd2].integrity <= 0) entCorpsify(nbd2);
     }
 }
-
 function entAge(nw1) {
     ent_matrix[nw1].age += 0.1;
     ent_matrix[nw1].integrity -= 0.1 + (0.002 * ent_matrix[nw1].circumference);
     if(ent_matrix[nw1].integrity <= 0) entCorpsify(nw1);
 }
-
 function entHeal(nbe1) {
     let obe1 = ent_matrix[nbe1];
     let nbe2 = entValueHealing(nbe1);
@@ -854,7 +843,6 @@ function entHeal(nbe1) {
         if(ent_matrix[nbe1].integrity > ent_matrix[nbe1].circumference) ent_matrix[nbe1].integrity = ent_matrix[nbe1].circumference - 0.1;
     }
 }
-
 function entEliminate(nu1) {
     ent_deaths++;
     total_lifespan_of_dead += ent_matrix[nu1].age;
@@ -899,7 +887,6 @@ function entNearestFood(nk6) {
     }
     return result;
 }
-
 function entNearestEnt(nao1) {
     let oao1 = ent_matrix[nao1];
     let nao6 = Infinity;
@@ -921,7 +908,6 @@ function entNearestEnt(nao1) {
     }
     return result;
 }
-
 function entFoodCount(nae1) {
     let nae5 = 0;
     let nae4 = entValueFoodSense(nae1);
@@ -933,7 +919,6 @@ function entFoodCount(nae1) {
     }
     ent_matrix[nae1].abundance = nae5;
 }
-
 function entEntCount(naf1) {
     ent_matrix[naf1].crowdedness = 0;
     for(let naf2 = 1; naf2 <= ent_count; naf2++) {
@@ -942,7 +927,6 @@ function entEntCount(naf1) {
         }
     }
 }
-
 function entFoodSeek(nl1) {
     if(food_count > 0) {
         let ol2 = ent_matrix[nl1];
@@ -953,7 +937,6 @@ function entFoodSeek(nl1) {
         } else return 0;
     }
 }
-
 function entPreySeek(nas1) {
     if(ent_count > 1) {
         let oas2 = ent_matrix[nas1];
@@ -964,7 +947,6 @@ function entPreySeek(nas1) {
         } else return 0;
     }
 }
-
 function entSeek(nav1) {
     let oav1 = ent_matrix[nav1];
     let nav2 = entNearestFood(nav1);
@@ -988,7 +970,6 @@ function entSeek(nav1) {
         ent_matrix[nav1].seeking = `nothing`;
     }
 }
-
 function entFoodCollide(nn1) {
     let on1 = ent_matrix[nn1];
     for(let nn2 = 1; nn2 <= food_count; nn2++) {
@@ -1007,7 +988,6 @@ function entFoodCollide(nn1) {
         }
     }
 }
-
 function entCorpsify(nbc1) {
     let obc1 = {};
     Object.assign(obc1, ent_matrix[nbc1]);
@@ -1021,7 +1001,6 @@ function entCorpsify(nbc1) {
         foodSpawn(obc1.x, obc1.y, nbc3);
     }
 }
-
 function entBreed(nab1) {
     let oab1 = ent_matrix[nab1];
     let nab2 = entValueNurture(nab1) + entValueFortify(nab1);
@@ -1064,7 +1043,6 @@ function entBreed(nab1) {
         ent_matrix[nab1].bred++;
     }
 }
-
 function entMutate(oad1, rarity, intensity) {
     if(randomInteger(0, rarity) === 0) {
         for(let nad5 = randomInteger(0, supermutation_rarity); nad5 === 0; nad5 = randomInteger(0, supermutation_rarity)) {intensity += supermutation_intensity};
@@ -1187,12 +1165,10 @@ function entMutate(oad1, rarity, intensity) {
         oad1.attackpower_crowdedness += randomNumber(-1, 1) / (20 / intensity);
     }
 }
-
 function entRelocate(nca1, xca1, yca1) {
     ent_matrix[nca1].x = xca1;
     ent_matrix[nca1].y = yca1;
 }
-
 function entMove(no1, external, ece) {
     let oo2 = ent_matrix[no1];
     let distance = oo2.pace;
@@ -1232,7 +1208,6 @@ function entMove(no1, external, ece) {
     }
     entFoodCollide(no1);
 }
-
 function condenseLineage(nbu1) {
     let obu1 = ent_matrix[nbu1];
     let sbu1 = obu1.lineage;
@@ -1252,7 +1227,6 @@ function condenseLineage(nbu1) {
     }
     return sbu2;
 }
-
 function entHighlight() {
     for(let nbw1 = 1; nbw1 <= ent_count; nbw1++) {
         if(findDistance(cursor_x, cursor_y, ent_matrix[nbw1].x, ent_matrix[nbw1].y) <= ent_matrix[nbw1].radius) {
@@ -1263,14 +1237,12 @@ function entHighlight() {
         }
     }
 }
-
 function entQuake(np1) {
     entRelocate(np1, ent_matrix[np1].x + randomInteger(-1, 1), ent_matrix[np1].y + randomInteger(-1, 1));
     entCollideWall(np1);
     entCollideEnt(np1);
     entFoodCollide(np1);
 }
-
 function entLapse() {
     for(let nz1 = 1; nz1 <= ent_count; nz1++) {
         entBreed(nz1);
@@ -1282,7 +1254,6 @@ function entLapse() {
         entAge(nz1);
     }
 }
-
 // - Food
 function foodSpawn(xh1, yh1, nh2) {
     food_count++;
@@ -1297,7 +1268,6 @@ function foodSpawn(xh1, yh1, nh2) {
         age: 0
     }
 }
-
 function foodEliminate(ni1) {
     for(let ni2 = ni1; ni2 < food_count; ni2++) {
         food_matrix[ni2] = food_matrix[ni2 + 1];
@@ -1305,18 +1275,15 @@ function foodEliminate(ni1) {
     food_matrix[food_count] = {};
     food_count--;
 }
-
 function foodAge(nbp1) {
     food_matrix[nbp1].age += 0.1;
     if(food_matrix[nbp1].age > food_matrix[nbp1].value * 3) foodEliminate(nbp1);
 }
-
 function foodLapse() {
     for(let nbq1 = 1; nbq1 <= food_count; nbq1++) {
         foodAge(nbq1);
     }
 }
-
 // Event listeners
 htmlCanvas.addEventListener(`mousemove`, e => {
     x = e.clientX;
@@ -1400,7 +1367,7 @@ htmlCanvas.addEventListener(`mousedown`, e => {
         }
         if(leftclick === `select` && ui_select_h === false && ui_food_h === false && ui_ent_h === false && ui_mutate_h === false) {
             if(highlight_id !== -1 && saved_highlight_id !== highlight_id) {
-                var transfer_highlight_id = saved_highlight_id;
+                let transfer_highlight_id = saved_highlight_id;
                 saved_highlight_id = highlight_id;
                 highlight_id = transfer_highlight_id;
             }
@@ -1478,21 +1445,18 @@ htmlCanvas.addEventListener(`mousedown`, e => {
         }
     }
 })
-
 window.addEventListener(`resize`, resizeCanvas);
-
 htmlCanvas.addEventListener(`contextmenu`, function(e) {
     e.preventDefault();
 })
-
 // Play
+resizeCanvas();
 for(let nq1 = 0; nq1 < ent_count_start; nq1++) {
     entGenesis(randomNumber(culture_x + 10, culture_x + culture_width - 10), randomNumber(culture_y + 10, culture_y + culture_height - 10));
 }
 for(let nr1 = 0; nr1 < food_count_min; nr1++) {
     foodSpawn(randomNumber(culture_x + 10, culture_x + culture_width - 10), randomNumber(culture_y + 10, culture_y + culture_height - 10), food_value());
 }
-resizeCanvas();
 ;(function () {
     let nt1 = 0;
     let nt3 = 0;
